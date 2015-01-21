@@ -380,11 +380,6 @@ static NSMutableDictionary* globalSVGKImageCache;
 	self.CALayerTree = nil; // invalidate the cached copy
 }
 
--(UIImage *)UIImage
-{
-	return [self exportUIImageAntiAliased:TRUE curveFlatnessFactor:1.0f interpolationQuality:kCGInterpolationDefault]; // Apple defaults
-}
-
 // the these draw the image 'right side up' in the usual coordinate system with 'point' being the top-left.
 
 - (void)drawAtPoint:(CGPoint)point                                                        // mode = kCGBlendModeNormal, alpha = 1.0
@@ -662,6 +657,10 @@ static NSMutableDictionary* globalSVGKImageCache;
     return layersByElementId;
 }
 
+-(UIImage *)UIImageWithScale:(CGFloat)scale
+{
+    return [self exportUIImageAntiAliased:TRUE curveFlatnessFactor:1.0f interpolationQuality:kCGInterpolationDefault scale:scale]; // Apple defaults
+}
 /**
  Shared between multiple different "export..." methods
  */
@@ -755,14 +754,13 @@ static NSMutableDictionary* globalSVGKImageCache;
 	return result;
 }
 
-
--(UIImage *) exportUIImageAntiAliased:(BOOL) shouldAntialias curveFlatnessFactor:(CGFloat) multiplyFlatness interpolationQuality:(CGInterpolationQuality) interpolationQuality
+-(UIImage *) exportUIImageAntiAliased:(BOOL) shouldAntialias curveFlatnessFactor:(CGFloat) multiplyFlatness interpolationQuality:(CGInterpolationQuality) interpolationQuality scale:(CGFloat)scale
 {
 	if( [self hasSize] )
 	{
 		DDLogVerbose(@"[%@] DEBUG: Generating a UIImage using the current root-object's viewport (may have been overridden by user code): {0,0,%2.3f,%2.3f}", [self class], self.size.width, self.size.height);
 		
-		UIGraphicsBeginImageContextWithOptions( self.size, FALSE, [UIScreen mainScreen].scale );
+		UIGraphicsBeginImageContextWithOptions( self.size, FALSE, scale );
 		CGContextRef context = UIGraphicsGetCurrentContext();
 		
 		[self renderToContext:context antiAliased:shouldAntialias curveFlatnessFactor:multiplyFlatness interpolationQuality:interpolationQuality flipYaxis:FALSE];
